@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Публичный веб-чат</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #f5f7fa;
+        }
+        .chat-header {
+            background: #1e88e5;
+            color: white;
+            padding: 15px 20px;
+            font-size: 20px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .nick-container {
+            background: white;
+            padding: 10px 20px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .nick-label {
+            font-weight: 500;
+            color: #555;
+        }
+        #currentNick {
+            background: #e3f2fd;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+            color: #0d47a1;
+        }
+        #nickInput {
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            outline: none;
+            flex: 0 1 200px;
+        }
+        #setNickBtn {
+            background: #1e88e5;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 6px 16px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        #setNickBtn:hover {
+            background: #1565c0;
+        }
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .message {
+            background: #f1f3f5;
+            border-radius: 18px;
+            padding: 8px 14px;
+            max-width: 70%;
+            align-self: flex-start;
+            word-wrap: break-word;
+        }
+        .message.own {
+            background: #1e88e5;
+            color: white;
+            align-self: flex-end;
+        }
+        .message-header {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 4px;
+            font-size: 0.85rem;
+        }
+        .message-nick {
+            font-weight: 600;
+            color: #0d47a1;
+        }
+        .message.own .message-nick {
+            color: #e3f2fd;
+        }
+        .message-time {
+            color: #757575;
+            font-size: 0.7rem;
+        }
+        .message.own .message-time {
+            color: #bbdefb;
+        }
+        .message-text {
+            line-height: 1.4;
+        }
+        .input-area {
+            background: white;
+            border-top: 1px solid #ddd;
+            padding: 15px 20px;
+            display: flex;
+            gap: 10px;
+        }
+        #messageInput {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #ccc;
+            border-radius: 24px;
+            outline: none;
+            font-size: 15px;
+        }
+        #sendBtn {
+            background: #1e88e5;
+            color: white;
+            border: none;
+            border-radius: 24px;
+            padding: 12px 24px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        #sendBtn:hover {
+            background: #1565c0;
+        }
+        .info-message {
+            text-align: center;
+            color: #888;
+            font-style: italic;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-header">
+        🗣️ Публичный чат
+        <span style="font-size: 14px; font-weight: normal;">все сообщения видны всем</span>
+    </div>
+
+    <div class="nick-container">
+        <span class="nick-label">Ваш ник:</span>
+        <span id="currentNick">Гость</span>
+        <input type="text" id="nickInput" placeholder="Введите ник" maxlength="20">
+        <button id="setNickBtn">Сменить</button>
+    </div>
+
+    <div id="messages" class="messages-container">
+        <!-- Сообщения будут добавляться сюда -->
+    </div>
+
+    <div class="input-area">
+        <input type="text" id="messageInput" placeholder="Введите сообщение..." autocomplete="off">
+        <button id="sendBtn">Отправить</button>
+    </div>
+
+    <!-- Подключаем Socket.IO клиент -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const socket = io.connect(window.location.origin);
+
+            const messagesDiv = document.getElementById('messages');
+            const messageInput = document.getElementById('messageInput');
+            const sendBtn = document.getElementById('sendBtn');
+            const nickInput = document.getElementById('nickInput');
+            const setNickBtn = document.getElementById('setNickBtn');
+            const currentNickSpan = document.getElementById('currentNick');
+
+            let currentNick = 'Гость';
+
+            // --- Получение истории при подключении ---
+            socket.on('history', (history) => {
+                history.forEach(msg => addMessageToChat(msg, false));
+                scrollToBottom();
+            });
+
+            // --- Получение нового сообщения ---
+            socket.on('message', (msg) => {
+                addMessageToChat(msg, msg.nick === currentNick);
+                scrollToBottom();
+            });
+
+            // --- Подтверждение смены ника ---
+            socket.on('nick_set', (data) => {
+                currentNick = data.nick;
+                currentNickSpan.textContent = currentNick;
+                nickInput.value = '';
+            });
+
+            // --- Отправка сообщения ---
+            function sendMessage() {
+                const text = messageInput.value.trim();
+                if (!text) return;
+
+                socket.emit('message', {
+                    nick: currentNick,
+                    text: text
+                });
+
+                messageInput.value = '';
+            }
+
+            sendBtn.addEventListener('click', sendMessage);
+            messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
+
+            // --- Смена ника ---
+            setNickBtn.addEventListener('click', () => {
+                const newNick = nickInput.value.trim();
+                if (newNick && newNick.length <= 20) {
+                    socket.emit('set_nick', { nick: newNick });
+                }
+            });
+
+            // --- Добавление сообщения в DOM ---
+            function addMessageToChat(msg, isOwn) {
+                const msgDiv = document.createElement('div');
+                msgDiv.className = `message ${isOwn ? 'own' : ''}`;
+
+                msgDiv.innerHTML = `
+                    <div class="message-header">
+                        <span class="message-nick">${escapeHtml(msg.nick)}</span>
+                        <span class="message-time">${escapeHtml(msg.time)}</span>
+                    </div>
+                    <div class="message-text">${escapeHtml(msg.text)}</div>
+                `;
+
+                messagesDiv.appendChild(msgDiv);
+            }
+
+            // --- Простой экранирование HTML ---
+            function escapeHtml(unsafe) {
+                return unsafe
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+
+            // --- Прокрутка вниз ---
+            function scrollToBottom() {
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+
+            // При загрузке предлагаем ввести ник, если хотим сразу
+            // Можно также установить случайный ник по умолчанию
+            const randomNick = 'User' + Math.floor(Math.random() * 1000);
+            socket.emit('set_nick', { nick: randomNick }); // установим автоматически
+        });
+    </script>
+</body>
+</html>
