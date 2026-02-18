@@ -37,7 +37,8 @@ def bot_speaker():
         messages_history.append(msg)
         if len(messages_history) > MAX_HISTORY:
             messages_history.pop(0)
-        socketio.emit('message', msg, broadcast=True)
+        # Убрали broadcast=True
+        socketio.emit('message', msg)
 
 # Запускаем фоновый поток (только один раз)
 threading.Thread(target=bot_speaker, daemon=True).start()
@@ -78,19 +79,19 @@ def handle_message(data):
         messages_history.append(bot_msg)
         if len(messages_history) > MAX_HISTORY:
             messages_history.pop(0)
-        socketio.emit('message', bot_msg, broadcast=True)
-        # Не сохраняем исходное сообщение? Лучше сохранить оба.
-        # Исходное сообщение тоже сохраняем:
+        socketio.emit('message', bot_msg)  # убрали broadcast
+
+        # Сохраняем исходное сообщение
         messages_history.append(msg)
         if len(messages_history) > MAX_HISTORY:
             messages_history.pop(0)
-        socketio.emit('message', msg, broadcast=True)
+        socketio.emit('message', msg)  # убрали broadcast
     else:
         # Обычное сообщение
         messages_history.append(msg)
         if len(messages_history) > MAX_HISTORY:
             messages_history.pop(0)
-        socketio.emit('message', msg, broadcast=True)
+        socketio.emit('message', msg)  # убрали broadcast
 
 @socketio.on('set_nick')
 def handle_set_nick(data):
@@ -107,7 +108,7 @@ def handle_set_nick(data):
         messages_history.append(welcome_msg)
         if len(messages_history) > MAX_HISTORY:
             messages_history.pop(0)
-        socketio.emit('message', welcome_msg, broadcast=True)
+        socketio.emit('message', welcome_msg)  # убрали broadcast
 
 if __name__ == '__main__':
     socketio.run(app, debug=True, host='0.0.0.0', port=5000)
