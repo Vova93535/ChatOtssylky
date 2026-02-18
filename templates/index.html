@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Публичный веб-чат</title>
+    <title>{{ _('chat_title') }}</title>
     <style>
         * {
             box-sizing: border-box;
@@ -13,8 +13,65 @@
             margin: 0;
             height: 100vh;
             display: flex;
-            flex-direction: column;
             background: #f5f7fa;
+        }
+        .sidebar {
+            width: 250px;
+            background: #ffffff;
+            border-right: 1px solid #ddd;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+        }
+        .sidebar h3 {
+            margin: 0 0 10px 0;
+            color: #1e88e5;
+            font-size: 18px;
+        }
+        .sidebar .account-info p {
+            margin: 5px 0;
+        }
+        .sidebar .account-info button {
+            background: #1e88e5;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 6px 16px;
+            cursor: pointer;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+        .sidebar .account-info button:hover {
+            background: #1565c0;
+        }
+        .sidebar select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            outline: none;
+        }
+        .sidebar .dev-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar .dev-links li {
+            margin-bottom: 8px;
+        }
+        .sidebar .dev-links a {
+            text-decoration: none;
+            color: #1e88e5;
+        }
+        .sidebar .dev-links a:hover {
+            text-decoration: underline;
+        }
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
         .chat-header {
             background: #1e88e5;
@@ -149,25 +206,51 @@
     </style>
 </head>
 <body>
-    <div class="chat-header">
-        🗣️ Публичный чат
-        <span style="font-size: 14px; font-weight: normal;">все сообщения видны всем</span>
+    <div class="sidebar">
+        <div class="account-info">
+            <h3>{{ _('account') }}</h3>
+            <p><strong>{{ _('your_nick') }}:</strong> <span id="sidebarNick">{{ session.get('nick', _('guest')) }}</span></p>
+            <button id="sidebarSetNickBtn">{{ _('change') }}</button>
+        </div>
+        <div class="language-selector">
+            <h3>{{ _('language') }}</h3>
+            <select id="languageSelect">
+                <option value="ru" {% if session.get('lang') == 'ru' %}selected{% endif %}>Русский</option>
+                <option value="en" {% if session.get('lang') == 'en' %}selected{% endif %}>English</option>
+                <option value="es" {% if session.get('lang') == 'es' %}selected{% endif %}>Español</option>
+            </select>
+        </div>
+        <div class="developer-block">
+            <h3>{{ _('developer') }}</h3>
+            <ul class="dev-links">
+                <li><a href="https://t.me/vova4kin26" target="_blank">📱 Telegram: @vova4kin26</a></li>
+                <li>📧 Google: mastervova38</li>
+                <li>📧 Yandex: vova2.2025</li>
+                <li><a href="https://github.com/Vova93535" target="_blank">🐙 GitHub: Vova93535</a></li>
+            </ul>
+        </div>
     </div>
+    <div class="chat-area">
+        <div class="chat-header">
+            🗣️ {{ _('chat_title') }}
+            <span style="font-size: 14px; font-weight: normal;">{{ _('all_messages_visible') }}</span>
+        </div>
 
-    <div class="nick-container">
-        <span class="nick-label">Ваш ник:</span>
-        <span id="currentNick">Гость</span>
-        <input type="text" id="nickInput" placeholder="Введите ник" maxlength="20">
-        <button id="setNickBtn">Сменить</button>
-    </div>
+        <div class="nick-container">
+            <span class="nick-label">{{ _('your_nick') }}:</span>
+            <span id="currentNick">{{ session.get('nick', _('guest')) }}</span>
+            <input type="text" id="nickInput" placeholder="{{ _('enter_nick') }}" maxlength="20">
+            <button id="setNickBtn">{{ _('change') }}</button>
+        </div>
 
-    <div id="messages" class="messages-container">
-        <!-- Сообщения будут добавляться сюда -->
-    </div>
+        <div id="messages" class="messages-container">
+            <!-- Сообщения будут добавляться сюда -->
+        </div>
 
-    <div class="input-area">
-        <input type="text" id="messageInput" placeholder="Введите сообщение..." autocomplete="off">
-        <button id="sendBtn">Отправить</button>
+        <div class="input-area">
+            <input type="text" id="messageInput" placeholder="{{ _('type_message') }}" autocomplete="off">
+            <button id="sendBtn">{{ _('send') }}</button>
+        </div>
     </div>
 
     <!-- Подключаем Socket.IO клиент -->
@@ -181,9 +264,12 @@
             const sendBtn = document.getElementById('sendBtn');
             const nickInput = document.getElementById('nickInput');
             const setNickBtn = document.getElementById('setNickBtn');
+            const sidebarSetNickBtn = document.getElementById('sidebarSetNickBtn');
             const currentNickSpan = document.getElementById('currentNick');
+            const sidebarNickSpan = document.getElementById('sidebarNick');
+            const languageSelect = document.getElementById('languageSelect');
 
-            let currentNick = 'Гость';
+            let currentNick = '{{ session.get('nick', _('guest')) }}';
 
             // --- Получение истории при подключении ---
             socket.on('history', (history) => {
@@ -201,6 +287,7 @@
             socket.on('nick_set', (data) => {
                 currentNick = data.nick;
                 currentNickSpan.textContent = currentNick;
+                sidebarNickSpan.textContent = currentNick;
                 nickInput.value = '';
             });
 
@@ -222,12 +309,26 @@
                 if (e.key === 'Enter') sendMessage();
             });
 
-            // --- Смена ника ---
+            // --- Смена ника (верхняя кнопка) ---
             setNickBtn.addEventListener('click', () => {
                 const newNick = nickInput.value.trim();
                 if (newNick && newNick.length <= 20) {
                     socket.emit('set_nick', { nick: newNick });
                 }
+            });
+
+            // --- Смена ника (боковая кнопка) ---
+            sidebarSetNickBtn.addEventListener('click', () => {
+                const newNick = nickInput.value.trim(); // используем то же поле ввода
+                if (newNick && newNick.length <= 20) {
+                    socket.emit('set_nick', { nick: newNick });
+                }
+            });
+
+            // --- Смена языка ---
+            languageSelect.addEventListener('change', (e) => {
+                const lang = e.target.value;
+                window.location.href = '/set_language/' + lang;
             });
 
             // --- Добавление сообщения в DOM ---
@@ -261,10 +362,11 @@
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
             }
 
-            // При загрузке предлагаем ввести ник, если хотим сразу
-            // Можно также установить случайный ник по умолчанию
-            const randomNick = 'User' + Math.floor(Math.random() * 1000);
-            socket.emit('set_nick', { nick: randomNick }); // установим автоматически
+            // Если при загрузке нет ника в сессии, генерируем случайный
+            if (currentNick === '{{ _('guest') }}') {
+                const randomNick = 'User' + Math.floor(Math.random() * 1000);
+                socket.emit('set_nick', { nick: randomNick });
+            }
         });
     </script>
 </body>

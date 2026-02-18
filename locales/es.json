@@ -1,0 +1,24 @@
+{
+    "chat_title": "Chat Público",
+    "all_messages_visible": "todos los mensajes son visibles para todos",
+    "your_nick": "Tu apodo",
+    "guest": "Invitado",
+    "enter_nick": "Ingresa tu apodo",
+    "change": "Cambiar",
+    "send": "Enviar",
+    "type_message": "Escribe un mensaje...",
+    "language": "Idioma",
+    "account": "Cuenta",
+    "developer": "Desarrollador",
+    "welcome": "¡Bienvenido, {nick}! Me alegra ver a un nuevo participante.",
+    "bot_phrases": [
+        "¡Hola! ¿Cómo estás?",
+        "¿Quién está conversando hoy aquí?",
+        "Me pregunto de qué hablaremos.",
+        "Solo soy un bot, ¡pero también quiero participar!",
+        "No me extrañen demasiado 😊",
+        "Por cierto, el clima hoy está excelente.",
+        "¿Está vivo el chat?",
+        "Recuerden, siempre estoy aquí."
+    ]
+}

@@ -1,0 +1,24 @@
+{
+    "chat_title": "Public Chat",
+    "all_messages_visible": "all messages are visible to everyone",
+    "your_nick": "Your nick",
+    "guest": "Guest",
+    "enter_nick": "Enter nick",
+    "change": "Change",
+    "send": "Send",
+    "type_message": "Type a message...",
+    "language": "Language",
+    "account": "Account",
+    "developer": "Developer",
+    "welcome": "Welcome, {nick}! Nice to see a new participant.",
+    "bot_phrases": [
+        "Hi! How are you?",
+        "Who's chatting here today?",
+        "I wonder what we'll talk about?",
+        "I'm just a bot, but I want to join in too!",
+        "Don't miss me too much 😊",
+        "The weather is great today, by the way.",
+        "Is the chat alive?",
+        "Remember, I'm always here."
+    ]
+}
