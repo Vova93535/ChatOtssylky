@@ -1,6 +1,6 @@
 # Public Web Chat on Flask and Socket.IO
 
-A simple yet functional real-time chat with message history and a built-in bot. All messages are visible to all connected users — perfect for small group conversations or testing web technologies.
+A simple yet functional real-time chat with message history and a built-in bot. All messages are visible to all connected users â€” perfect for small group conversations or testing web technologies.
 
 ## ? Features
 - Instant message sending and receiving (WebSocket)
@@ -48,8 +48,8 @@ Done! The chat works locally. You can open multiple tabs or devices on the same 
 - **Change nickname:** enter a new nickname in the top field and click "Change" (a random nickname like `User123` is assigned by default).
 - **Send a message:** type your text in the bottom field and press Enter or click the "Send" button.
 - **Bot commands:**
-  - `!bot` — bot introduces itself.
-  - `!bot Hello!` — bot repeats your message.
+  - `!bot` â€” bot introduces itself.
+  - `!bot Hello!` â€” bot repeats your message.
 
 ## ?? Production Deployment
 
@@ -57,7 +57,7 @@ Done! The chat works locally. You can open multiple tabs or devices on the same 
 1. Upload files via console or FTP.
 2. Create a web app with manual configuration, choose Python 3.x.
 3. Install dependencies: `pip install --user -r req.txt`.
-4. In WSGI configuration, point to your app (Flask + SocketIO may need extra setup — better use another option).
+4. In WSGI configuration, point to your app (Flask + SocketIO may need extra setup â€” better use another option).
 
 ### Option 2: Render (recommended)
 1. Create a new Web Service, connect your repository.
@@ -89,11 +89,3 @@ ChatOtssylky/
 
 ## ?? Contributing
 If you find a bug or have a suggestion for improvement, feel free to open an issue or a pull request. We welcome contributions!
-
-## ?? License
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details (if present).
-
----
-
-**Author:** Vova93535  
-**Link:** [https://github.com/Vova93535/ChatOtssylky](https://github.com/Vova93535/ChatOtssylky)
